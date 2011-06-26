@@ -77,7 +77,7 @@
 					),
 					$overlay = $('<div/>').attr('id', 'dialog-overlay').css(display_none).click($.dialog.close),
 					$loading = $('<div/>').attr('id', 'dialog-loading').css(display_none).click($.dialog.cancel),
-					$temp = $('<div/>').attr('id', 'dialog-temp').css({display: 'none', position: 'absolute', top: 0, left: 0})
+					$temp = $('<div/>').attr('id', 'dialog-temp').css({display: 'none', position: 'absolute'})
 				);
 			}
 			container_size = {
@@ -189,15 +189,16 @@
 		_adjustSize = function() {
 			$element.appendTo($temp);
 			var view = _getViewport(),
-				element_width = $temp.width(),
-				element_height = $temp.height(),
+				element_width = $temp.outerWidth(),
+				element_height = $temp.outerHeight(),
 				max_width = view.width - container_size.width - current_options.margin * 2,
 				max_height = view.height - container_size.height - current_options.margin * 2,
 				options_max_width = current_options.maxWidth,
 				options_max_height = current_options.maxHeight,
+				is_iframe = current_element.is_iframe,
 				is_percent, ratio;
 			
-			if (current_element.is_iframe || ! current_options.autoSize) {
+			if (is_iframe || ! current_options.autoSize) {
 				element_width = current_options.width;
 				element_height = current_options.height;
 			}
@@ -227,6 +228,7 @@
 					element_width = max_width;
 				}
 			}
+			if ( ! is_image && ! is_iframe) element_width++;
 			$element.css({width: element_width, height: element_height});
 		};
 		
@@ -293,7 +295,7 @@
 				$buttons = null;
 				$close.show();
 			}
-			$container.hide().css({top: 0, left: 0});
+			$container.hide();
 			current_options.onClosed.call(current_element.pointer);
 		});
 	};
