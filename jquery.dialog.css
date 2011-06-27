@@ -1,11 +1,11 @@
 /*!
- * jquery dialog 1.0
+ * jquery dialog 1.1
  * 
  * Copyright 2011, Stefan Benicke (opusonline.at)
  * Dual licensed under the MIT or GPL Version 3 licenses. (LICENSES.txt)
  */
 #dialog-overlay {
-	position: absolute;
+	position: fixed;
 	top: 0;
 	left: 0;
 	width: 100%;

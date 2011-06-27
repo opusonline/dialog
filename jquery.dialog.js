@@ -149,7 +149,7 @@
 		_showContainer = function() {
 			_adjustSize();
 			$wrap.append($element);
-			$overlay.css({opacity: current_options.overlayOpacity, background: current_options.overlayColor, width: $document.width(), height: $document.height()}).fadeIn(current_options.speed);
+			$overlay.css({opacity: current_options.overlayOpacity, background: current_options.overlayColor}).fadeIn(current_options.speed);
 			$container.css({opacity: start_opacity, top: - container_height, left: container_left}).show()
 			.animate({opacity: 1, top: 0}, current_options.speed, function() {
 				is_open = true;
