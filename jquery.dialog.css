@@ -54,15 +54,14 @@
 	border-bottom-right-radius: 5px;
 }
 #dialog .close {
+	display: block;
 	position: absolute;
 	bottom: -8px;
 	right: -8px;
 	width: 16px;
 	height: 16px;
 	text-indent: -9999px;
-	border: 0 none;
 	background: url(close.png) no-repeat center;
-	cursor: pointer;
 	-webkit-border-radius: 8px;
 	-moz-border-radius: 8px;
 	border-radius: 8px;

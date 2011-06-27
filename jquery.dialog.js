@@ -1,5 +1,5 @@
 /*!
- * jquery dialog 1.0
+ * jquery dialog 1.1
  * 
  * Copyright 2011, Stefan Benicke (opusonline.at)
  * Dual licensed under the MIT or GPL Version 3 licenses. (LICENSES.txt)
@@ -18,7 +18,7 @@
 		$buttons,
 		current_options,
 		current_element,
-		container_size,
+		container_left,
 		container_height,
 		namespace = '.dialog',
 		is_open = false,
@@ -37,7 +37,7 @@
 			speed: 250,
 			margin: 30,
 			overlayOpacity: 0.3,
-			overlayColor: '#fff',
+			overlayColor: '#333',
 			type: '',
 			href: '',
 			content: '',
@@ -54,12 +54,6 @@
 			onCancel: function(){},
 			onError: function(){}
 		},
-		_getViewport = function() {
-			return {
-				width: $window.width(),
-				height: $window.height()
-			};
-		},
 		_keyAction = function(event) {
 			if ( ! is_open) return;
 			if (event.keyCode == esc_key) {
@@ -73,17 +67,13 @@
 				$('body').append(
 					$container = $('<div/>').attr('id', 'dialog').css(display_none).append(
 						$wrap = $('<div/>').attr('class', 'wrap'),
-						$close = $('<button/>').attr({type: 'button', 'class': 'close'}).html('close').click($.dialog.close)
+						$close = $('<a href="javascript:void(0)" class="close">close</a>').click($.dialog.close)
 					),
 					$overlay = $('<div/>').attr('id', 'dialog-overlay').css(display_none).click($.dialog.close),
 					$loading = $('<div/>').attr('id', 'dialog-loading').css(display_none).click($.dialog.cancel),
 					$temp = $('<div/>').attr('id', 'dialog-temp').css({display: 'none', position: 'absolute'})
 				);
 			}
-			container_size = {
-				width: $container.outerWidth(),
-				height: $container.outerHeight()
-			};
 		},
 		_start = function() {
 			current_options.onStart.call(current_element.pointer);
@@ -158,16 +148,7 @@
 		},
 		_showContainer = function() {
 			_adjustSize();
-			$wrap.empty().append($element);
-			if (current_options.buttons.length) {
-				_addButtons();
-				$close.hide();
-			}
-			container_height = $container.outerHeight();
-			var view = _getViewport(),
-				container_width = $container.outerWidth(),
-				container_left = max((view.width - container_width) / 2, 0);
-			
+			$wrap.append($element);
 			$overlay.css({opacity: current_options.overlayOpacity, background: current_options.overlayColor, width: $document.width(), height: $document.height()}).fadeIn(current_options.speed);
 			$container.css({opacity: start_opacity, top: - container_height, left: container_left}).show()
 			.animate({opacity: 1, top: 0}, current_options.speed, function() {
@@ -187,12 +168,20 @@
 			}
 		},
 		_adjustSize = function() {
+			$wrap.empty();
 			$element.appendTo($temp);
-			var view = _getViewport(),
+			var container_only_width = $container.outerWidth();
+			if (current_options.buttons.length) {
+				_addButtons();
+				$close.hide();
+			}
+			var container_only_height = $container.outerHeight(),
 				element_width = $temp.outerWidth(),
 				element_height = $temp.outerHeight(),
-				max_width = view.width - container_size.width - current_options.margin * 2,
-				max_height = view.height - container_size.height - current_options.margin * 2,
+				view_width = $window.width(),
+				view_height = $window.height(),
+				element_max_width = view_width - container_only_width - current_options.margin * 2,
+				element_max_height = view_height - container_only_height - current_options.margin,
 				options_max_width = current_options.maxWidth,
 				options_max_height = current_options.maxHeight,
 				is_iframe = current_element.is_iframe,
@@ -204,31 +193,33 @@
 			}
 			if (options_max_width) {
 				is_percent = options_max_width.toString(10).match(percent_regexp);
-				max_width = is_percent ? max_width / 100 * min(is_percent[1], 100) : min(options_max_width, max_width);
+				element_max_width = is_percent ? element_max_width / 100 * min(is_percent[1], 100) : min(options_max_width, element_max_width);
 			}
 			if (options_max_height) {
 				is_percent = options_max_height.toString(10).match(percent_regexp);
-				max_height = is_percent ? max_height / 100 * min(is_percent[1], 100) : min(options_max_height, max_height);
+				element_max_height = is_percent ? element_max_height / 100 * min(is_percent[1], 100) : min(options_max_height, element_max_height);
 			}
-			if (element_height > max_height) {
+			if (element_height > element_max_height) {
 				if (is_image) {
 					ratio = element_width / element_height;
-					element_height = max_height;
+					element_height = element_max_height;
 					element_width = element_height * ratio;
 				} else {
-					element_height = max_height;
+					element_height = element_max_height;
 				}
 			}
-			if (element_width > max_width) {
+			if (element_width > element_max_width) {
 				if (is_image) {
 					ratio = element_height / element_width;
-					element_width = max_width;
+					element_width = element_max_width;
 					element_height = element_width * ratio;
 				} else {
-					element_width = max_width;
+					element_width = element_max_width;
 				}
 			}
-			if ( ! is_image && ! is_iframe) element_width++;
+			if ( ! is_image && ! is_iframe) element_width++; // prevent word wrap
+			container_height = element_height + container_only_height;
+			container_left = max((view_width - element_width - container_only_width / 2) / 2, 0);
 			$element.css({width: element_width, height: element_height});
 		};
 		
@@ -273,7 +264,7 @@
 	};
 			
 	$.dialog.cancel = function() {
-		if (!current_element) {
+		if ( ! current_element) {
 			$.dialog.hideLoading();
 			return;
 		}
